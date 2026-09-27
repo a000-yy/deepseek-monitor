@@ -1,0 +1,46 @@
+{
+  "name": "deepseek-monitor",
+  "version": "1.6.0",
+  "description": "DeepSeek 余额与花费桌面悬浮窗",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "icon": "node tools/make-icon.js",
+    "dist": "electron-builder --win portable"
+  },
+  "author": "",
+  "license": "MIT",
+  "build": {
+    "appId": "com.ccovo.deepseekmonitor",
+    "productName": "DeepSeekMonitor",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "signAndEditExecutable": false
+    },
+    "portable": {
+      "artifactName": "DeepSeekMonitor-${version}.exe"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  }
+}

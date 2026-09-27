@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'" />
+  <title>DeepSeek 用量监控</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="card">
+    <!-- 顶部拖动栏 -->
+    <header class="titlebar">
+      <div class="brand">
+        <span class="dot"></span>
+        <span class="brand-text">DeepSeek 用量</span>
+      </div>
+      <button id="btn-menu" class="icon-btn" title="菜单" aria-label="菜单">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+          <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+      </button>
+    </header>
+
+    <div id="menu" class="menu hidden">
+      <button class="menu-item" data-action="refresh">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.6-6.4M21 3v6h-6" /></svg>
+        <span>刷新数据</span>
+      </button>
+      <button class="menu-item" data-action="setup">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /><circle cx="9" cy="6" r="2.1" fill="currentColor" stroke="none" /><circle cx="15" cy="12" r="2.1" fill="currentColor" stroke="none" /><circle cx="9" cy="18" r="2.1" fill="currentColor" stroke="none" /></svg>
+        <span>设置</span>
+      </button>
+      <button class="menu-item" data-action="export">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14" /></svg>
+        <span>导出数据</span>
+      </button>
+      <button class="menu-item" data-action="pin">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 17v5M5 17h14l-1.5-6.5a2 2 0 0 0-2-1.5h-7a2 2 0 0 0-2 1.5L5 17z" /></svg>
+        <span id="pin-label">悬浮固定</span>
+      </button>
+      <div class="menu-sep"></div>
+      <button class="menu-item" data-action="hide">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 20h14" /></svg>
+        <span>隐藏到托盘</span>
+      </button>
+      <button class="menu-item danger" data-action="quit">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M15 4h3a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-3M10 12H3m0 0 3-3m-3 3 3 3" /></svg>
+        <span>退出</span>
+      </button>
+    </div>
+
+    <!-- 主面板 -->
+    <main id="main-panel">
+      <div class="balance-block">
+        <div class="label">当前余额</div>
+        <div class="balance"><span class="cur">¥</span><span id="balance-val">--</span></div>
+        <div id="available-tag" class="tag"></div>
+      </div>
+
+      <div class="progress-block">
+        <div class="progress-head">
+          <span id="spent-text">已花费 ¥-- / ¥--</span>
+          <span id="progress-pct">--%</span>
+        </div>
+        <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-label" id="stat-cost-label">今日消费</div>
+          <div class="stat-val">¥<span id="today-spent">--</span></div>
+        </div>
+        <div class="stat">
+          <div class="stat-label" id="stat-token-label">今日 Token</div>
+          <div class="stat-val"><span id="today-tokens">--</span></div>
+        </div>
+      </div>
+
+      <div class="chart-block">
+        <div class="chart-head">
+          <span>近 7 天消费</span>
+          <span id="week-total" class="muted"></span>
+        </div>
+        <div id="chart" class="chart"></div>
+      </div>
+
+      <div class="foot">
+        <span id="updated" class="muted">等待刷新…</span>
+        <span id="err" class="err"></span>
+      </div>
+    </main>
+
+    <!-- 设置面板 -->
+    <section id="setup-panel" class="hidden">
+      <div class="field">
+        <label>DeepSeek API Key</label>
+        <input id="in-api-key" type="password" placeholder="sk-..." autocomplete="off" />
+        <div class="hint">
+          在
+          <a href="#" id="link-console">platform.deepseek.com/api_keys</a>
+          创建。留空则不改动已保存的 Key。
+        </div>
+      </div>
+      <div class="field">
+        <label>官网用量令牌（用于获取真实消费 / Token）</label>
+        <div class="row-inline">
+          <button id="btn-sync" class="btn ghost">登录并同步</button>
+          <button id="btn-clear-token" class="btn ghost">清除令牌</button>
+        </div>
+        <div id="token-status" class="hint">未同步，当前为本地估算数据</div>
+      </div>
+      <div class="field">
+        <label>累计充值总额（¥，用于计算花费进度）</label>
+        <input id="in-topup" type="number" min="0" step="0.01" placeholder="例如 100" />
+      </div>
+      <div class="field-two">
+        <div class="field">
+          <label>刷新间隔（秒）</label>
+          <input id="in-interval" type="number" min="15" step="5" />
+        </div>
+        <div class="field">
+          <label>不透明度</label>
+          <input id="in-opacity" type="number" min="0.3" max="1" step="0.05" />
+        </div>
+      </div>
+      <div class="field-two">
+        <div class="field">
+          <label>提醒阈值（¥，0=关）</label>
+          <input id="in-threshold" type="number" min="0" step="0.01" placeholder="例如 10" />
+        </div>
+        <div class="field">
+          <label>冷却（分钟）</label>
+          <input id="in-cooldown" type="number" min="5" step="5" />
+        </div>
+      </div>
+      <label class="switch-row">
+        <input id="in-autostart" type="checkbox" />
+        <span>开机自动启动</span>
+      </label>
+      <div class="setup-actions">
+        <button id="btn-cancel" class="btn ghost">取消</button>
+        <button id="btn-save" class="btn primary">保存</button>
+      </div>
+      <div id="setup-msg" class="muted small"></div>
+    </section>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
