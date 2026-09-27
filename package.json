@@ -1,6 +1,6 @@
 {
   "name": "deepseek-monitor",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "DeepSeek 余额与花费桌面悬浮窗",
   "main": "main.js",
   "scripts": {

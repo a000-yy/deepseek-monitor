@@ -681,7 +681,7 @@ function createWindow() {
     resizable: false,
     maximizable: false,
     fullscreenable: false,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     skipTaskbar: true,
     hasShadow: false,
     backgroundColor: '#00000000',
@@ -692,7 +692,8 @@ function createWindow() {
     }
   })
 
-  win.setAlwaysOnTop(true, 'screen-saver')
+  // 沉到桌面层：不置顶，其他任何窗口都可正常遮挡悬浮窗
+  win.setAlwaysOnTop(false)
   win.setOpacity(Math.min(1, Math.max(0.3, Number(config.opacity) || 1)))
   win.loadFile(path.join(__dirname, 'src', 'index.html'))
   win.on('closed', () => (win = null))
